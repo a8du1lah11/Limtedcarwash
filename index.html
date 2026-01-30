@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Car Wash Admin App</title>
+    <style>
+        :root {
+            --primary: #007bff;
+            --success: #25D366;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica; background: #eef2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 400px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        
+        .header { background: var(--dark); color: white; padding: 25px 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 22px; letter-spacing: 1px; }
+        .header p { margin: 5px 0 0; opacity: 0.7; font-size: 12px; }
+
+        .content { padding: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 12px; font-weight: bold; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        
+        input { 
+            width: 100%; padding: 14px; border: 2px solid #eee; border-radius: 12px; 
+            box-sizing: border-box; font-size: 16px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--primary); outline: none; background: #f0f7ff; }
+
+        .btn { 
+            width: 100%; padding: 16px; border: none; border-radius: 12px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-wa { background: var(--success); color: white; display: none; margin-top: 20px; }
+        
+        /* Animation for appearance */
+        .search-result { 
+            background: #f0f7ff; padding: 15px; border-radius: 12px; 
+            margin-top: 15px; display: none; border: 1px solid #d0e3ff;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-box { background: white; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #d0e3ff; }
+        .stat-val { display: block; font-size: 18px; font-weight: bold; color: var(--primary); }
+        .stat-lab { font-size: 10px; color: #999; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>WASH PRO</h1>
+        <p>ADMIN MANAGEMENT SYSTEM</p>
+    </div>
+
+    <div class="content">
+        <div class="input-group">
+            <label>Car Plate Number</label>
+            <input type="text" id="plateInput" placeholder="Enter Plate..." oninput="lookupCar()">
+        </div>
+
+        <div id="newCustomerForm" style="display: none;">
+            <div class="input-group">
+                <label>Customer Name</label>
+                <input type="text" id="nameInput" placeholder="John Doe">
+            </div>
+            <div class="input-group">
+                <label>WhatsApp Number</label>
+                <input type="tel" id="phoneInput" placeholder="CountryCode + Number">
+            </div>
+            <button class="btn btn-main" onclick="processCar()">Register & Check-In</button>
+        </div>
+
+        <div id="searchResult" class="search-result">
+            <label>Customer Found</label>
+            <div style="font-size: 18px; font-weight: bold; color: var(--dark);" id="displayName"></div>
+            
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <span class="stat-val" id="displayVisits">0</span>
+                    <span class="stat-lab">TOTAL VISITS</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="displayPhone"></span>
+                    <span class="stat-lab">WHATSAPP</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-main" style="margin-top:15px;" onclick="processCar()">Confirm Check-In</button>
+        </div>
+
+        <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">
+            📱 Send "Ready" WhatsApp
+        </button>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = "CARWASH_DATABASE";
+
+    function getDB() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : {};
+    }
+
+    function lookupCar() {
+        const plate = document.getElementById('plateInput').value.trim().toUpperCase();
+        const db = getDB();
+        const resultBox = document.getElementById('searchResult');
+        const regForm = document.getElementById('newCustomerForm');
+        const waBtn = document.getElementById('waBtn');
+
+        if (plate.length < 2) {
+            resultBox.style.display = 'none';
+            regForm.style.display = 'none';
+            waBtn.style.display = 'none';
+            return;
+        }
+
+        if (db[plate]) {
+            // EXISTING CAR
+            const user = db[plate];
+            regForm.style.display = 'none';
+            resultBox.style.display = 'block';
+            waBtn.style.display = 'block';
+            
+            document.getElementById('displayName').innerText = user.name;
+            document.getElementById('displayVisits').innerText = user.visits;
+            document.getElementById('displayPhone').innerText = "+" + user.phone;
+            
+            window.activeUser = { ...user, plate: plate };
+        } else {
+            // NEW CAR
+            resultBox.style.display = 'none';
+            waBtn.style.display = 'none';
+            regForm.style.display = 'block';
+            window.activeUser = null;
+        }
+    }
+
+    function processCar() {
+        const db = getDB();
+        const plate = document.getElementById('plateInput').value.trim().toUpperCase();
+        let name, phone, visits;
+
+        if (window.activeUser) {
+            // Returning customer
+            name = window.activeUser.name;
+            phone = window.activeUser.phone;
+            visits = parseInt(window.activeUser.visits) + 1;
+        } else {
+            // New customer
+            name = document.getElementById('nameInput').value.trim();
+            phone = document.getElementById('phoneInput').value.trim().replace(/\D/g,'');
+            visits = 1;
+
+            if (!name || !phone) {
+                alert("Please enter Name and Phone");
+                return;
+            }
+        }
+
+        db[plate] = { name, phone, visits };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+        
+        alert(`Success! Visit #${visits} recorded for ${name}.`);
+        lookupCar(); // Refresh UI
+    }
+
+    function sendWhatsApp() {
+        if (!window.activeUser) return;
+        const msg = `Hello ${window.activeUser.name}! 🚗 Your car is ready and looking great. This was your visit #${window.activeUser.visits}. See you soon!`;
+        window.open(`https://wa.me/${window.activeUser.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
