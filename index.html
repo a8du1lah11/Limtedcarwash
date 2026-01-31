@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Limited Carwash | Admin</title>
+    <style>
+        :root { 
+            --primary-red: #e63946; 
+            --dark-bg: #121212; 
+            --card-bg: #1e1e1e;
+            --text-light: #f1f2f6;
+            --text-dim: #a4b0be;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; 
+            background: var(--dark-bg); 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+            color: var(--text-light);
+        }
+
+        .app-card { 
+            width: 100%; 
+            max-width: 400px; 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            overflow: hidden; 
+            border: 1px solid #333;
+        }
+
+        .header { 
+            background: linear-gradient(135deg, #000000 0%, #330000 100%); 
+            padding: 30px 20px; 
+            text-align: center; 
+            border-bottom: 3px solid var(--primary-red);
+        }
+
+        .header h1 { 
+            margin: 0; 
+            font-size: 24px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            color: var(--primary-red);
+        }
+
+        .header p { margin: 5px 0 0; font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+
+        .content { padding: 25px; }
+
+        label { 
+            display: block; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: var(--primary-red); 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin-bottom: 20px; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+            background: #252525;
+            color: white;
+            outline: none; 
+            transition: 0.3s;
+        }
+
+        input:focus { border-color: var(--primary-red); background: #2d2d2d; }
+
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            text-transform: uppercase;
+        }
+
+        .btn-save { background: var(--primary-red); color: white; margin-bottom: 12px; }
+        .btn-save:hover { background: #c32f3a; }
+
+        .btn-wa { background: #25D366; color: white; display: none; margin-top: 10px; }
+        .btn-wa:hover { background: #1ebd59; }
+
+        .result-box { 
+            background: #2d2d2d; 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-top: 5px; 
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-red); 
+            display: none; 
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .info-text { margin: 8px 0; font-size: 15px; color: var(--text-light); }
+        .info-text b { color: var(--text-dim); font-size: 13px; }
+        .badge { background: var(--primary-red); color: white; padding: 3px 10px; border-radius: 6px; font-size: 14px; font-weight: bold; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="header">
+        <h1>Limited Carwash</h1>
+        <p>PREMIUM ADMIN SYSTEM</p>
+    </div>
+    
+    <div class="content">
+        <label>Plate Number</label>
+        <input type="text" id="plate" placeholder="ENTER PLATE" oninput="lookup()">
+
+        <div id="newInputs">
+            <label>Car Model</label>
+            <input type="text" id="model" placeholder="e.g. BMW X5">
+            <label>Customer Name</label>
+            <input type="text" id="name" placeholder="Name">
+            <label>WhatsApp (with Country Code)</label>
+            <input type="tel" id="phone" placeholder="e.g. 1234567890">
+        </div>
+
+        <div id="resultBox" class="result-box">
+            <span id="resVisits" class="badge"></span>
+            <p class="info-text"><b>Owner:</b> <br><span id="resName"></span></p>
+            <p class="info-text"><b>Car Model:</b> <br><span id="resModel"></span></p>
+        </div>
+
+        <button class="btn btn-save" onclick="saveData()">Check-In & Save</button>
+        <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 Send Ready Message</button>
+    </div>
+</div>
+
+<script>
+    const DB_NAME = "LIMITED_CW_DATABASE";
+
+    function getDB() {
+        return JSON.parse(localStorage.getItem(DB_NAME)) || {};
+    }
+
+    function lookup() {
+        const plate = document.getElementById('plate').value.toUpperCase().trim();
+        const db = getDB();
+        const resBox = document.getElementById('resultBox');
+        const newInputs = document.getElementById('newInputs');
+        const waBtn = document.getElementById('waBtn');
+
+        if (db[plate]) {
+            const user = db[plate];
+            newInputs.style.display = 'none';
+            resBox.style.display = 'block';
+            waBtn.style.display = 'block';
+            
+            document.getElementById('resName').innerText = user.name;
+            document.getElementById('resModel').innerText = user.model;
+            document.getElementById('resVisits').innerText = "Visits: " + user.visits;
+            window.activeCustomer = { ...user, plate: plate };
+        } else {
+            newInputs.style.display = 'block';
+            resBox.style.display = 'none';
+            waBtn.style.display = 'none';
+            window.activeCustomer = null;
+        }
+    }
+
+    function saveData() {
+        const plate = document.getElementById('plate').value.toUpperCase().trim();
+        const db = getDB();
+        let name, phone, model, visits;
+
+        if (!plate) { alert("Enter Plate Number!"); return; }
+
+        if (window.activeCustomer) {
+            name = window.activeCustomer.name;
+            phone = window.activeCustomer.phone;
+            model = window.activeCustomer.model;
+            visits = window.activeCustomer.visits + 1;
+        } else {
+            name = document.getElementById('name').value.trim();
+            phone = document.getElementById('phone').value.trim().replace(/\D/g,'');
+            model = document.getElementById('model').value.trim();
+            visits = 1;
+
+            if (!name || !phone || !model) {
+                alert("Please fill all fields for new customer!");
+                return;
+            }
+        }
+
+        db[plate] = { name, phone, model, visits };
+        localStorage.setItem(DB_NAME, JSON.stringify(db));
+        alert("✅ " + name + " Checked In! Visit #" + visits);
+        lookup();
+    }
+
+    function sendWhatsApp() {
+        if (!window.activeCustomer) return;
+        
+        const customer = window.activeCustomer;
+        const message = `*LIMITED CARWASH*%0A%0AHello ${customer.name},%0AYour car is ready for pickup!%0A%0A*Car:* ${customer.model}%0A*Plate:* ${customer.plate}%0A*Total Visits:* ${customer.visits}%0A%0AThank you for choosing us!`;
+        
+        const url = `https://wa.me/${customer.phone}?text=${message}`;
+        window.open(url, '_blank');
+    }
+</script>
+
+</body>
+</html>
