@@ -127,7 +127,7 @@
     function sendWhatsApp() {
         if (!window.activeCustomer) return;
         const c = window.activeCustomer;
-        const msg = `*LIMITED CARWASH*%0A%0AHello ${c.name},%0AYour car is ready for pickup!%0A%0A*Car:* ${c.model}%0A*Plate:* ${c.plate}%0A*Total Visits:* ${c.visits}%0A%0AThank you!`;
+        const msg = `*LIMITED CARWASH*%0A%0Aبەرێز ${c.name},%0Aبەرێز ترومبێلاتە بتەمامي یا هاتی شويشتن تو نوکە دشیێ وەربگري گەهاندنا ترومبێلێ ژیک یا هەی ئەگەر تە دەم نەبیت بهیێ ترومبێلا خو وەربگري %0A%0A*Car:* ${c.model}%0A*ژمارا ترومبیلێ* ${c.plate}%0A*ژمارا سەرەدانیت تە بو غسلا مە* ${c.visits}%0A%0AThank you!`;
         window.open(`https://wa.me/${c.phone}?text=${msg}`, '_blank');
     }
 </script>
