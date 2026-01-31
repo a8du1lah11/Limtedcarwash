@@ -30,15 +30,15 @@
     </div>
     
     <div class="content">
-        <label>Plate Number</label>
-        <input type="text" id="plate" placeholder="ABC-123" oninput="lookup()">
+        <label>ژمارا ترومبیلێ</label>
+        <input type="text" id="plate" placeholder="24a1234" oninput="lookup()">
 
         <div id="newInputs">
-            <label>Car Model</label>
+            <label>جورێ ترومبیلێ</label>
             <input type="text" id="model" placeholder="e.g. Mercedes C200">
-            <label>Customer Name</label>
+            <label>ناڤێ رێزداري</label>
             <input type="text" id="name" placeholder="Name">
-            <label>WhatsApp (with Country Code)</label>
+            <label>WhatsApp (دگەل ژمارا +964)</label>
             <input type="tel" id="phone" placeholder="e.g. 964750...">
         </div>
 
@@ -48,8 +48,8 @@
             <p><b>Model:</b> <span id="resModel"></span></p>
         </div>
 
-        <button class="btn btn-save" onclick="saveData()">Check-In & Cloud Sync</button>
-        <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 Send Done Message</button>
+        <button class="btn btn-save" onclick="saveData()">تومارکرن - تماشەکرنا ژمارێ</button>
+        <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 ئەگەر ترومبێل بەرهەڤبي نامێ فرێکە</button>
     </div>
 </div>
 
@@ -66,9 +66,9 @@
             const response = await fetch(CLOUD_URL);
             const cloudData = await response.json();
             localStorage.setItem(DB_NAME, JSON.stringify(cloudData));
-            document.getElementById('syncStatus').innerText = "Cloud Synced ✅";
+            document.getElementById('syncStatus').innerText = "هاتە تومارکرن ✅";
         } catch (e) {
-            document.getElementById('syncStatus').innerText = "Offline Mode ⚠️";
+            document.getElementById('syncStatus').innerText = "سیستەمي زیرەک یێ تومارکرني ⚠️";
         }
     }
 
