@@ -48,7 +48,7 @@
             <p><b>Model:</b> <span id="resModel"></span></p>
         </div>
 
-        <button class="btn btn-save" onclick="saveData()">تومارکرن - تماشەکرنا ژمارێ</button>
+        <button class="btn btn-save" onclick="saveData()">تومارکرن ـ زێدەکرنا سەرەداني</button>
         <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 ئەگەر ترومبێل بەرهەڤبي نامێ فرێکە</button>
     </div>
 </div>
@@ -127,7 +127,7 @@
     function sendWhatsApp() {
         if (!window.activeCustomer) return;
         const c = window.activeCustomer;
-        const msg = `*LIMITED CARWASH*%0A%0Aبەرێز ${c.name},%0Aبەرێز ترومبێلاتە بتەمامي یا هاتی شويشتن تو نوکە دشیێ وەربگري گەهاندنا ترومبێلێ ژیک یا هەی ئەگەر تە دەم نەبیت بهیێ ترومبێلا خو وەربگري %0A%0A*Car:* ${c.model}%0A*ژمارا ترومبیلێ* ${c.plate}%0A*ژمارا سەرەدانیت تە بو غسلا مە* ${c.visits}%0A%0AThank you!`;
+        const msg = `*LIMITED CARWASH*%0A%0Aبەرێز ${c.name},%0Aبەرێز ترومبێلاتە بتەمامي یا هاتی شويشتن تو نوکە دشیێ وەربگري گەهاندنا ترومبێلێ ژیک یا هەی ئەگەر تە دەم نەبیت بهیێ ترومبێلا خو وەربگري %0A%0A*ترومبیلا:* ${c.model}%0A*ژمارا ترومبیلێ* ${c.plate}%0A*ژمارا سەرەدانیت تە بو غسلا مە* ${c.visits}%0A%0AThank you!`;
         window.open(`https://wa.me/${c.phone}?text=${msg}`, '_blank');
     }
 </script>
