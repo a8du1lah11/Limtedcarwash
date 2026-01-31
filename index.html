@@ -140,7 +140,7 @@
             <p class="info-text"><b>Car Model:</b> <br><span id="resModel"></span></p>
         </div>
 
-        <button class="btn btn-save" onclick="saveData()">Check-In & Save</button>
+        <button class="btn btn-save" onclick="function saveData() {     const plate = document.getElementById('plate').value.toUpperCase().trim();     const db = getDB();     let name, phone, model, visits;      if (!plate) { alert("Enter Plate Number!"); return; }      if (window.activeCustomer) {         name = window.activeCustomer.name;         phone = window.activeCustomer.phone;         model = window.activeCustomer.model;         visits = window.activeCustomer.visits + 1;     } else {         name = document.getElementById('name').value.trim();         phone = document.getElementById('phone').value.trim().replace(/\D/g,'');         model = document.getElementById('model').value.trim();         visits = 1;     }      const customerData = { plate, name, phone, model, visits };      // 1. Save to Local Storage (for speed)     db[plate] = customerData;     localStorage.setItem(DB_NAME, JSON.stringify(db));      // 2. Save to Google Sheets (Cloud Backup)     const GOOGLE_SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";      fetch(GOOGLE_SCRIPT_URL, {         method: 'POST',         mode: 'no-cors', // Important for Google Script         body: JSON.stringify(customerData)     }).then(() => {         alert("✅ " + name + " Saved to Cloud! Visit #" + visits);         lookup();     }).catch(err => {         alert("Saved locally, but Cloud sync failed.");         console.error(err);     }); }">Check-In & Save</button>
         <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 Send Ready Message</button>
     </div>
 </div>
@@ -177,7 +177,7 @@
         }
     }
 
-    function saveData() {
+    function function saveData() {     const plate = document.getElementById('plate').value.toUpperCase().trim();     const db = getDB();     let name, phone, model, visits;      if (!plate) { alert("Enter Plate Number!"); return; }      if (window.activeCustomer) {         name = window.activeCustomer.name;         phone = window.activeCustomer.phone;         model = window.activeCustomer.model;         visits = window.activeCustomer.visits + 1;     } else {         name = document.getElementById('name').value.trim();         phone = document.getElementById('phone').value.trim().replace(/\D/g,'');         model = document.getElementById('model').value.trim();         visits = 1;     }      const customerData = { plate, name, phone, model, visits };      // 1. Save to Local Storage (for speed)     db[plate] = customerData;     localStorage.setItem(DB_NAME, JSON.stringify(db));      // 2. Save to Google Sheets (Cloud Backup)     const GOOGLE_SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";      fetch(GOOGLE_SCRIPT_URL, {         method: 'POST',         mode: 'no-cors', // Important for Google Script         body: JSON.stringify(customerData)     }).then(() => {         alert("✅ " + name + " Saved to Cloud! Visit #" + visits);         lookup();     }).catch(err => {         alert("Saved locally, but Cloud sync failed.");         console.error(err);     }); } {
         const plate = document.getElementById('plate').value.toUpperCase().trim();
         const db = getDB();
         let name, phone, model, visits;
