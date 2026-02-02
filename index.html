@@ -3,108 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Limited Carwash | Cloud Admin</title>
+    <title>Limited Carwash | Cloud Sync</title>
     <style>
         :root { --red: #e63946; --dark: #121212; --card: #1e1e1e; --text: #f1f2f6; --dim: #a4b0be; }
-        
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: var(--dark); 
+            font-family: 'Segoe UI', sans-serif; background: var(--dark); 
             background-image: linear-gradient(rgba(18, 18, 18, 0.9), rgba(18, 18, 18, 0.9)), url('https://images.unsplash.com/photo-1520333781090-e2516332b107?q=80&w=1000');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background-size: cover; background-position: center; background-attachment: fixed;
             margin: 0; padding: 15px; color: var(--text); 
         }
-
         .app-card { width: 100%; max-width: 420px; background: var(--card); border-radius: 25px; margin: auto; border: 1px solid #444; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.8); }
-        
-        .header { background: linear-gradient(135deg, #000, #400); padding: 25px; text-align: center; border-bottom: 3px solid var(--red); position: relative; }
-        .header h1 { margin: 0; font-size: 24px; color: var(--red); text-transform: uppercase; letter-spacing: 1px; }
-        .washing-icon { font-size: 30px; margin-bottom: 5px; display: block; }
-        .status-sync { font-size: 10px; color: #00ff00; margin-top: 5px; }
-
+        .header { background: linear-gradient(135deg, #000, #400); padding: 25px; text-align: center; border-bottom: 3px solid var(--red); }
+        .header h1 { margin: 0; font-size: 24px; color: var(--red); text-transform: uppercase; }
+        .status-sync { font-size: 11px; padding: 5px; font-weight: bold; }
+        .sync-ok { color: #00ff00; }
+        .sync-loading { color: #f1c40f; }
         .content { padding: 20px; }
-        .section-title { font-size: 12px; color: var(--red); font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; display: flex; align-items: center; gap: 5px; }
-        
         label { display: block; font-size: 11px; color: var(--dim); margin-bottom: 5px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 10px; background: #252525; color: white; font-size: 16px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--red); background: #2d2d2d; }
-
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
-        .btn-save { background: var(--red); color: white; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3); }
-        .btn-edit { background: #576574; color: white; font-size: 12px; padding: 8px; margin-top: 10px; }
-        .btn-wa { background: #25D366; color: white; display: none; margin-top: 10px; }
-        
-        .result-box { background: #2d2d2d; padding: 15px; border-radius: 15px; margin-bottom: 15px; border-left: 5px solid var(--red); display: none; position: relative; }
-        .badge { background: var(--red); color: white; padding: 4px 10px; border-radius: 8px; float: right; font-size: 12px; font-weight: bold; }
-        
-        .edit-panel { background: #252525; padding: 15px; border-radius: 15px; border: 1px dashed var(--dim); margin-top: 10px; display: none; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #333; border-radius: 10px; background: #252525; color: white; font-size: 16px; box-sizing: border-box; }
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-save { background: var(--red); color: white; }
+        .result-box { background: #2d2d2d; padding: 15px; border-radius: 15px; border-left: 5px solid var(--red); display: none; margin-bottom: 15px; }
+        .badge { background: var(--red); color: white; padding: 4px 10px; border-radius: 8px; float: right; font-size: 12px; }
     </style>
 </head>
-<body onload="syncFromCloud()">
+<body onload="syncData()">
 
 <div class="app-card">
     <div class="header">
-        <span class="washing-icon">🧼🚿🚗</span>
         <h1>Limited Carwash</h1>
-        <div id="syncStatus" class="status-sync">Cloud Connected</div>
+        <div id="syncStatus" class="status-sync sync-loading">🔄 Connecting to Cloud...</div>
     </div>
     
     <div class="content">
-        <div class="section-title">🔍 دیتای ترومبیلێ</div>
-        <label>ژمارا ترومبیلێ (Plate Number)</label>
+        <label>Plate Number</label>
         <input type="text" id="plate" placeholder="24a1234" oninput="lookup()">
-
-        <div id="newInputs">
-            <div class="section-title">📝 تومارکرنا نوی</div>
-            <label>جورێ ترومبیلێ</label>
-            <input type="text" id="model" placeholder="e.g. Mercedes C200">
-            <label>ناڤێ رێزداري</label>
-            <input type="text" id="name" placeholder="Name">
-            <label>WhatsApp (دگەل ژمارا +964)</label>
-            <input type="tel" id="phone" placeholder="9647501234567">
-        </div>
 
         <div id="resultBox" class="result-box">
             <span id="resVisits" class="badge"></span>
-            <p style="margin:0"><b>Owner:</b> <span id="resName"></span></p>
-            <p style="margin:5px 0 0"><b>Model:</b> <span id="resModel"></span></p>
-            
-            <button class="btn btn-edit" onclick="toggleEdit()">⚙️ دەستکاری کرنا پێزانیان (Edit)</button>
+            <p><b>Owner:</b> <span id="resName"></span></p>
+            <p><b>Model:</b> <span id="resModel"></span></p>
         </div>
 
-        <div id="editPanel" class="edit-panel">
-            <div class="section-title">✏️ دەستکاری (Edit Section)</div>
-            <label>گوهورینا ناڤی</label>
-            <input type="text" id="editName">
-            <label>گوهورینا ژمارێ</label>
-            <input type="tel" id="editPhone">
-            <label>گوهورینا مودیلی</label>
-            <input type="text" id="editModel">
-            <button class="btn" style="background:#2ecc71; color:white;" onclick="updateData()">Save Changes</button>
+        <div id="newInputs">
+            <label>Car Model</label>
+            <input type="text" id="model" placeholder="Model">
+            <label>Customer Name</label>
+            <input type="text" id="name" placeholder="Name">
+            <label>WhatsApp Number</label>
+            <input type="tel" id="phone" placeholder="964750...">
         </div>
 
-        <button class="btn btn-save" style="margin-top:10px;" onclick="saveData()">✅ تومارکرن ـ زێدەکرنا سەرەداني</button>
-        <button id="waBtn" class="btn btn-wa" onclick="sendWhatsApp()">📱 ئەگەر ترومبێل بەرهەڤبي نامێ فرێکە</button>
+        <button class="btn btn-save" onclick="saveData()">Save & Sync</button>
     </div>
 </div>
 
 <script>
     const DB_NAME = "LIMITED_CW_DATABASE";
-    const CLOUD_URL = "https://script.google.com/macros/s/AKfycbzAh78H4H3VWmNz3jrw_h1PxhXj09ENeTdVKmbhOHSSJ4GQTjeUOAmi1SjNtQNKnG_BnQ/exec"; 
+    // *** PASTE YOUR NEW DEPLOYMENT URL HERE ***
+    const CLOUD_URL = "https://script.google.com/macros/s/AKfycby6zDeJNfxyUY4dKx0V1MbAehB0yuCBtwE0hXQCxQRofdoebwnyOtbNyZR33oNsJsxvkA/exec"; 
 
     function getDB() { return JSON.parse(localStorage.getItem(DB_NAME)) || {}; }
 
-    async function syncFromCloud() {
-        document.getElementById('syncStatus').innerText = "Syncing...";
+    async function syncData() {
+        const status = document.getElementById('syncStatus');
         try {
             const response = await fetch(CLOUD_URL);
-            const cloudData = await response.json();
-            localStorage.setItem(DB_NAME, JSON.stringify(cloudData));
-            document.getElementById('syncStatus').innerText = "هاتە تومارکرن ✅";
+            const data = await response.json();
+            localStorage.setItem(DB_NAME, JSON.stringify(data));
+            status.innerText = "Cloud Synced ✅ (All devices up to date)";
+            status.className = "status-sync sync-ok";
         } catch (e) {
-            document.getElementById('syncStatus').innerText = "سیستەمي زیرەک یێ تومارکرني ⚠️";
+            status.innerText = "Offline Mode ⚠️ (Using local memory)";
         }
     }
 
@@ -113,90 +83,47 @@
         const db = getDB();
         const resBox = document.getElementById('resultBox');
         const newInputs = document.getElementById('newInputs');
-        const waBtn = document.getElementById('waBtn');
-        const editPanel = document.getElementById('editPanel');
-
-        editPanel.style.display = 'none';
 
         if (db[plate]) {
             const user = db[plate];
             newInputs.style.display = 'none';
             resBox.style.display = 'block';
-            waBtn.style.display = 'block';
             document.getElementById('resName').innerText = user.name;
             document.getElementById('resModel').innerText = user.model;
             document.getElementById('resVisits').innerText = "Visits: " + user.visits;
-            
-            // Pre-fill Edit Fields
-            document.getElementById('editName').value = user.name;
-            document.getElementById('editPhone').value = user.phone;
-            document.getElementById('editModel').value = user.model;
-            
             window.activeCustomer = { ...user, plate: plate };
         } else {
             newInputs.style.display = 'block';
             resBox.style.display = 'none';
-            waBtn.style.display = 'none';
             window.activeCustomer = null;
         }
-    }
-
-    function toggleEdit() {
-        const panel = document.getElementById('editPanel');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function updateData() {
-        const plate = document.getElementById('plate').value.toUpperCase().trim();
-        const db = getDB();
-        
-        db[plate].name = document.getElementById('editName').value;
-        db[plate].phone = document.getElementById('editPhone').value.replace(/\D/g,'');
-        db[plate].model = document.getElementById('editModel').value;
-
-        localStorage.setItem(DB_NAME, JSON.stringify(db));
-        
-        // Sync to cloud
-        fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(db[plate]) });
-        
-        alert("Pîzanîn هاتنە گوهورین!");
-        toggleEdit();
-        lookup();
     }
 
     async function saveData() {
         const plate = document.getElementById('plate').value.toUpperCase().trim();
         const db = getDB();
-        let name, phone, model, visits;
+        let data;
 
         if (window.activeCustomer) {
-            name = window.activeCustomer.name;
-            phone = window.activeCustomer.phone;
-            model = window.activeCustomer.model;
-            visits = parseInt(window.activeCustomer.visits) + 1;
+            data = { ...window.activeCustomer, visits: parseInt(window.activeCustomer.visits) + 1 };
         } else {
-            name = document.getElementById('name').value;
-            phone = document.getElementById('phone').value.replace(/\D/g,'');
-            model = document.getElementById('model').value;
-            visits = 1;
-            if(!plate || !name) return alert("تکایە هەمی خانان پر بکە");
+            data = {
+                plate: plate,
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value.replace(/\D/g,''),
+                model: document.getElementById('model').value,
+                visits: 1
+            };
         }
 
-        const data = { plate, name, phone, model, visits };
         db[plate] = data;
         localStorage.setItem(DB_NAME, JSON.stringify(db));
 
-        fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+        // Sync to Cloud
+        await fetch(CLOUD_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
         
-        alert(`Success! Visit #${visits} for ${name}`);
+        alert("Saved to Cloud!");
         lookup();
-    }
-
-    function sendWhatsApp() {
-        if (!window.activeCustomer) return;
-        const c = window.activeCustomer;
-        const msg = `*LIMITED CARWASH*%0A%0Aبەرێز ${c.name},%0Aبەرێز ترومبێلاتە بتەمامي یا هاتی شويشتن تو نوکە دشیێ وەربگري گەهاندنا ترومبێلێ ژیک یا هەی ئەگەر تە دەم نەبیت بهیێ ترومبێلا خو وەربگري %0A%0A*ترومبیلا:* ${c.model}%0A*ژمارا ترومبیلێ* ${c.plate}%0A*ژمارا سەرەدانیت تە بو غسلا مە* ${c.visits}%0A%0AThank you!`;
-        window.open(`https://wa.me/${c.phone}?text=${msg}`, '_blank');
     }
 </script>
 </body>
